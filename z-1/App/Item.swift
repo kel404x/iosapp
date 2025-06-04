@@ -1,5 +1,3 @@
-
-
 import SwiftUI
 import ImageIO
 
@@ -10,28 +8,27 @@ struct Item: Identifiable {
 
     init(url: URL) {
         self.url = url
-        self.metadata = Item.extractMetadata(from: url)
+        self.metadata = Item.extractTIFFMetadata(from: url)
     }
 
-    private static func extractMetadata(from url: URL) -> [String: Any]? {
+    private static func extractTIFFMetadata(from url: URL) -> [String: Any]? {
         guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
-              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] else {
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              let tiffDict = properties["{TIFF}" as CFString] as? [CFString: Any] else {
             return nil
         }
 
-        // Convert CFString keys to regular Swift Strings
+        // Convert CFString keys to Swift String
         var result: [String: Any] = [:]
-        for (key, value) in properties {
+        for (key, value) in tiffDict {
             result[key as String] = value
         }
         return result
     }
 }
 
-
 extension Item: Equatable {
     static func ==(lhs: Item, rhs: Item) -> Bool {
         return lhs.id == rhs.id && lhs.url == rhs.url
     }
 }
-

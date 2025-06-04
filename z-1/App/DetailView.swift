@@ -2,6 +2,8 @@ import SwiftUI
 
 struct DetailView: View {
     let item: Item
+    @State private var verificationResult: String? = nil
+    @State private var isVerifying: Bool = false
 
     var body: some View {
         ScrollView {
@@ -30,10 +32,43 @@ struct DetailView: View {
                         .font(.caption)
                         .foregroundColor(.gray)
                 }
+
+                Divider()
+
+                // Verify Button
+                Button(action: verifyMetadata) {
+                    Text(isVerifying ? "Verifying..." : "Verify")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(isVerifying)
+
+                // Result Output
+                if let result = verificationResult {
+                    Text("Verification Result: \(result)")
+                        .font(.caption)
+                        .foregroundColor(result.contains("Success") ? .green : .red)
+                }
             }
             .padding()
         }
         .navigationTitle("Detail View")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    // Mock verification logic
+    func verifyMetadata() {
+        isVerifying = true
+        verificationResult = nil
+
+        // Simulate async task (replace with real logic)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            if let metadata = item.metadata, metadata.keys.contains("TIFF") {
+                verificationResult = "Success: Verified TIFF metadata"
+            } else {
+                verificationResult = "Failure: No valid TIFF data"
+            }
+            isVerifying = false
+        }
     }
 }
